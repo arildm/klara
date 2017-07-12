@@ -16,12 +16,14 @@ def klara_print_tasks(tasks):
     points_total = 0
     for task in tasks:
         created = '{:%Y-%m-%d}'.format(datetime.fromtimestamp(task['created']))
-        print(tpl.format(task.eid, task['description'], task['topic'], task['points'], created, task.get('finished', '')))
+        finished = '{:%Y-%m-%d}'.format(datetime.fromtimestamp(task['finished'])) if 'finished' in task else ''
+        print(tpl.format(task.eid, task['description'], task['topic'], task['points'],
+            created, finished))
         try:
             points_total += int(task['points'])
         except ValueError: {}
     print(width * '-')
-    print('Total points: ' + str(points_total))
+    print('Total points: {}'.format(points_total))
 
 def klara_create():
     table = db.table('task')
@@ -35,9 +37,9 @@ def klara_edit(id, key=None, value=None):
     table = db.table('task')
     task = table.get(eid=id)
     if (task == None):
-        sys.stderr.write('No task with id ' + id + '\n')
+        sys.stderr.write('No task with id {}!\n'.format(id))
         return
-    print('Editing task ' + str(task.eid) + '.')
+    print('Editing task {}.'.format(id))
     task = klara_edit_input(task)
     table.update(task, eids=[id])
 
@@ -51,9 +53,25 @@ def klara_edit_input(task={}, keys=['description', 'topic', 'points']):
             task[key] = raw
     return task
 
+def klara_finish(id):
+    id = int(id)
+    table = db.table('task')
+    task = table.get(eid=id)
+    if task == None:
+        sys.stderr.write('No task with id {}!\n'.format(id))
+        return
+    if 'finished' in task:
+        time = datetime.fromtimestamp(task['finished'])
+        sys.stderr.write('Task {} already finished at {:%Y-%m-%d}!\n'.format(id, time))
+        return
+    time = datetime.now()
+    task['finished'] = time.timestamp()
+    table.update(task, eids=[id])
+    print('Task {} finished at {:%Y-%m-%d}.'.format(id, time))
+
 if __name__ == '__main__':
     if (len(sys.argv) < 2):
-        sys.stderr.write('Missing command arg.\n')
+        sys.stderr.write('Missing command arg!\n')
         sys.exit(1)
     command = sys.argv[1]
     args = sys.argv[2:]
@@ -64,5 +82,7 @@ if __name__ == '__main__':
         klara_create(*args)
     elif (command == 'edit'):
         klara_edit(*args)
+    elif (command == 'finish'):
+        klara_finish(*args)
     else:
         print('Unknown command "' + command + '"')

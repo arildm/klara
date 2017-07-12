@@ -28,3 +28,8 @@ Minimalistic Python CLI task manager.
     topic ["doc"]: meta
     points ["1"]: 2
 
+### Finish
+
+    $ python3 klara.py finish 1
+    Task 2 finished at 2017-07-12.
+
