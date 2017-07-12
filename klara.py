@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import sys
 from tinydb import TinyDB, Query
+from datetime import datetime
 
 def klara_list(sortfield = ''):
     table = db.table('task')
@@ -8,13 +9,14 @@ def klara_list(sortfield = ''):
     klara_print_tasks(tasks)
 
 def klara_print_tasks(tasks):
-    tpl = '{:>4} {:<40} {:<10} {:>10} {:>10} {:>10}'
-    width = 4 + 1 + 40 + 1 + 10 + 1 + 10 + 1 + 10 + 1 + 10
+    tpl = '{:>4} {:<30} {:<10} {:>6} {:>10} {:>10}'
+    width = 4 + 1 + 30 + 1 + 10 + 1 + 6 + 1 + 10 + 1 + 10
     print(tpl.format('ID', 'Description', 'Topic', 'Points', 'Created', 'Finished'))
     print(width * '-')
     points_total = 0
     for task in tasks:
-        print(tpl.format(task.eid, task['description'], task['topic'], task['points'], task.get('created', ''), task.get('finished', '')))
+        created = '{:%Y-%m-%d}'.format(datetime.fromtimestamp(task['created']))
+        print(tpl.format(task.eid, task['description'], task['topic'], task['points'], created, task.get('finished', '')))
         points_total += int(task['points'])
     print(width * '-')
     print('Total points: ' + str(points_total))
@@ -26,7 +28,7 @@ def klara_create():
     print('Creating task.')
     for key in keys:
         task[key] = input(key + ': ')
-    task['created'] = 0
+    task['created'] = datetime.now().timestamp()
     table.insert(task)
 
 if __name__ == '__main__':
