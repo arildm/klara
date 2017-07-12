@@ -20,3 +20,11 @@ Minimalistic Python CLI task manager.
     ---------------------------------------------------------------------------
     Total points: 1
 
+### Edit
+
+    $ python3 klara.py edit 1
+    Editing task 1.
+    description ["Create README"]: 
+    topic ["doc"]: meta
+    points ["1"]: 2
+
