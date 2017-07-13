@@ -3,14 +3,50 @@ import sys
 from tinydb import TinyDB, Query
 from datetime import datetime
 
+class Task(dict):
+
+    TIME_FORMAT = '{:%Y-%m-%d}'
+
+    def __init__(self, d={}):
+        dict.__init__(self, d)
+        # Re-set special values.
+        if 'created' in d:
+            self.created = d['created']
+        if 'finished' in d:
+            self.finished = d['finished']
+        try:
+            self.eid = d.eid
+        except AttributeError: {}
+
+    def __setattr__(self, attr, value):
+        if attr in ['created', 'finished']:
+            if isinstance(value, datetime):
+                value = value.timestamp()
+        if attr in ['points']:
+            try:
+                value = int(value)
+            except ValueError:
+                value = 0
+        self[attr] = value
+
+    def __getattr__(self, attr):
+        if attr in self:
+            if attr in ['created', 'finished']:
+                time = datetime.fromtimestamp(self[attr])
+                return self.TIME_FORMAT.format(time)
+            return self[attr]
+        return ''
+
+
 class Klara():
 
-    def __init__(self, dbfile="klara.json"):
-        self.db = TinyDB('db.json')
+    def __init__(self, dbfile='klara.json'):
+        self.db = TinyDB(dbfile)
         self.table = self.db.table('task')
 
     def list(self, sortfield=''):
         tasks = self.table.all()
+        tasks = [Task(task) for task in tasks]
         Klara.print_tasks(tasks)
 
     def print_tasks(tasks):
@@ -18,56 +54,52 @@ class Klara():
         width = 4 + 1 + 30 + 1 + 10 + 1 + 6 + 1 + 10 + 1 + 10
         print(tpl.format('ID', 'Description', 'Topic', 'Points', 'Created', 'Finished'))
         print(width * '-')
-        points_total = 0
         for task in tasks:
-            created = format_time(task['created'])
-            finished = format_time(task['finished']) if 'finished' in task else ''
-            print(tpl.format(task.eid, task['description'], task['topic'], task['points'],
-                created, finished))
-            try:
-                points_total += int(task['points'])
-            except ValueError: {}
+            print(tpl.format(task.eid, task.description, task.topic, task.points,
+                task.created, task.finished))
         print(width * '-')
+        points_total = sum(int(task.points) for task in tasks)
         print('Total points: {}'.format(points_total))
 
     def create(self):
         print('Creating task.')
         task = Klara.edit_input()
-        task['created'] = datetime.now().timestamp()
+        task.created = datetime.now()
         self.table.insert(task)
 
-    def edit(self,id, key=None, value=None):
+    def edit(self, id, key=None, value=None):
         id = int(id)
-        task = self.table.get(eid=id)
-        if (task == None):
-            sys.stderr.write('No task with id {}!\n'.format(id))
-            return
+        task = self.get(id)
         print('Editing task {}.'.format(id))
         task = Klara.edit_input(task)
         self.table.update(task, eids=[id])
 
-    def edit_input(task={}, keys=['description', 'topic', 'points']):
+    def get(self, id):
+        el = self.table.get(eid=id)
+        if (el == None):
+            raise Error('No task with id {}'.format(id))
+        return Task(el)
+
+    def edit_input(task=Task(), keys=['description', 'topic', 'points']):
         for key in keys:
             # Suggest existing value.
-            suggestion = ' ["' + task[key] + '"]' if key in task else ''
+            suggestion = ' ["' + getattr(task, key) + '"]' if key in task else ''
             raw = input(key + suggestion + ': ')
             # Leave existing value if input is empty.
             if (raw or not suggestion):
-                task[key] = raw
+                setattr(task, key, raw)
         return task
 
     def finish(self, id):
         id = int(id)
-        task = self.table.get(eid=id)
-        if task == None:
-            sys.stderr.write('No task with id {}!\n'.format(id))
+        task = self.get(id)
+        if task.finished:
+            sys.stderr.write('Task {} already finished at {}!\n'.format(id, task.finished))
             return
-        if 'finished' in task:
-            sys.stderr.write('Task {} already finished at {}!\n'.format(id, format_time(task['finished'])))
-            return
-        task['finished'] = datetime.now().timestamp()
+        task.finished = datetime.now()
         self.table.update(task, eids=[id])
-        print('Task {} finished at {}.'.format(id, format_time(task['finished'])))
+        print('Task {} finished at {}.'.format(id, task.finished))
+
 
 def format_time(dt):
     tpl = '{:%Y-%m-%d}'
