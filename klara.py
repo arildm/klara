@@ -116,6 +116,11 @@ class Klara():
         tasks = [Task(task) for task in result]
         Klara.print_tasks(tasks)
 
+    def topic(self, topic):
+        result = self.table.search(Query().topic == topic)
+        tasks = [Task(task) for task in result]
+        Klara.print_tasks(tasks)
+
 
 def format_time(dt):
     tpl = '{:%Y-%m-%d}'

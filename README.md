@@ -65,3 +65,14 @@ search \<term>
        1 Create README                  doc             2 2017-07-13           
     ---------------------------------------------------------------------------
     Total points: 2
+
+### Topic
+
+topic \<topic>
+
+    $ python3 klara.py topic doc
+      ID Description                    Topic      Points    Created   Finished
+    ---------------------------------------------------------------------------
+       1 Create README                  doc             2 2017-07-13           
+    ---------------------------------------------------------------------------
+    Total points: 2
