@@ -20,8 +20,8 @@ class Klara():
         print(width * '-')
         points_total = 0
         for task in tasks:
-            created = '{:%Y-%m-%d}'.format(datetime.fromtimestamp(task['created']))
-            finished = '{:%Y-%m-%d}'.format(datetime.fromtimestamp(task['finished'])) if 'finished' in task else ''
+            created = format_time(task['created'])
+            finished = format_time(task['finished']) if 'finished' in task else ''
             print(tpl.format(task.eid, task['description'], task['topic'], task['points'],
                 created, finished))
             try:
@@ -63,13 +63,21 @@ class Klara():
             sys.stderr.write('No task with id {}!\n'.format(id))
             return
         if 'finished' in task:
-            time = datetime.fromtimestamp(task['finished'])
-            sys.stderr.write('Task {} already finished at {:%Y-%m-%d}!\n'.format(id, time))
+            sys.stderr.write('Task {} already finished at {}!\n'.format(id, format_time(task['finished'])))
             return
-        time = datetime.now()
-        task['finished'] = time.timestamp()
+        task['finished'] = datetime.now().timestamp()
         self.table.update(task, eids=[id])
-        print('Task {} finished at {:%Y-%m-%d}.'.format(id, time))
+        print('Task {} finished at {}.'.format(id, format_time(task['finished'])))
+
+def format_time(dt):
+    tpl = '{:%Y-%m-%d}'
+    if isinstance(dt, datetime):
+        return tpl.format(dt)
+    try:
+        dt = int(dt)
+        return tpl.format(datetime.fromtimestamp(dt))
+    except ValueError: {}
+    raise ValueError('Time not recognizable')
 
 if __name__ == '__main__':
     if (len(sys.argv) < 2):
