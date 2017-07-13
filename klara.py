@@ -70,8 +70,12 @@ class Klara():
     def edit(self, id, key=None, value=None):
         id = int(id)
         task = self.get(id)
-        print('Editing task {}.'.format(id))
-        task = Klara.edit_input(task)
+        if value == None:
+            print('Editing task {}.'.format(id))
+            task = Klara.edit_input(task, keys=[key])
+        else:
+            print('Setting {} to {}.'.format(key, value))
+            setattr(task, key, value)
         self.table.update(task, eids=[id])
 
     def get(self, id):
