@@ -2,6 +2,10 @@
 
 Minimalistic Python CLI task manager.
 
+## Requirements
+
+* [TinyDB](http://tinydb.readthedocs.io/en/latest/)
+
 ## Usage
 
 ### Create
