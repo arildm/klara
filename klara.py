@@ -44,7 +44,7 @@ class Klara():
         self.db = TinyDB(dbfile)
         self.table = self.db.table('task')
 
-    def list(self, sortfield=None):
+    def list(self, sortfield='eid'):
         tasks = self.table.all()
         tasks = [Task(task) for task in tasks]
         if sortfield != None:
@@ -74,7 +74,10 @@ class Klara():
         task = self.get(id)
         if value == None:
             print('Editing task {}.'.format(id))
-            task = Klara.edit_input(task, keys=[key])
+            if key == None:
+                task = Klara.edit_input(task)
+            else:
+                task = Klara.edit_input(task, keys=[key])
         else:
             print('Setting {} to {}.'.format(key, value))
             setattr(task, key, value)
@@ -89,7 +92,7 @@ class Klara():
     def edit_input(task=Task(), keys=['description', 'topic', 'points']):
         for key in keys:
             # Suggest existing value.
-            suggestion = ' ["' + getattr(task, key) + '"]' if key in task else ''
+            suggestion = ' ["' + str(getattr(task, key)) + '"]' if key in task else ''
             raw = input(key + suggestion + ': ')
             # Leave existing value if input is empty.
             if (raw or not suggestion):
@@ -105,6 +108,13 @@ class Klara():
         task.finished = datetime.now()
         self.table.update(task, eids=[id])
         print('Task {} finished at {}.'.format(id, task.finished))
+
+    def search(self, term):
+        def match(description):
+            return term.lower() in description.lower()
+        result = self.table.search(Query().description.test(match))
+        tasks = [Task(task) for task in result]
+        Klara.print_tasks(tasks)
 
 
 def format_time(dt):
@@ -124,13 +134,4 @@ if __name__ == '__main__':
     command = sys.argv[1]
     args = sys.argv[2:]
     klara = Klara()
-    if (command == 'list'):
-        klara.list(*args)
-    elif (command == 'create'):
-        klara.create(*args)
-    elif (command == 'edit'):
-        klara.edit(*args)
-    elif (command == 'finish'):
-        klara.finish(*args)
-    else:
-        print('Unknown command "' + command + '"')
+    getattr(klara, command)(*args)

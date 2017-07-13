@@ -55,3 +55,13 @@ finish \<id>
     $ python3 klara.py finish 1
     Task 2 finished at 2017-07-12.
 
+### Search
+
+search \<term>
+
+    $ python3 klara.py search read
+      ID Description                    Topic      Points    Created   Finished
+    ---------------------------------------------------------------------------
+       1 Create README                  doc             2 2017-07-13           
+    ---------------------------------------------------------------------------
+    Total points: 2
