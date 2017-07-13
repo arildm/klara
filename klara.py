@@ -44,9 +44,11 @@ class Klara():
         self.db = TinyDB(dbfile)
         self.table = self.db.table('task')
 
-    def list(self, sortfield=''):
+    def list(self, sortfield=None):
         tasks = self.table.all()
         tasks = [Task(task) for task in tasks]
+        if sortfield != None:
+            tasks.sort(key=lambda t: getattr(t, sortfield))
         Klara.print_tasks(tasks)
 
     def print_tasks(tasks):

@@ -9,16 +9,27 @@ Minimalistic Python CLI task manager.
     $ python3 klara.py create
     description: Create README
     topic: doc
-    points: 1
+    points: 2
 
 ### List
 
-    $ python3 klara.py list
+list [\<sortfield>]
+
+    $ python3 klara.py list 
       ID Description                    Topic      Points    Created   Finished
     ---------------------------------------------------------------------------
-       1 Create README                  doc             1 2017-07-12           
+       1 Create README                  doc             2 2017-07-13           
+       2 Git setup                      admin           1 2017-07-13           
     ---------------------------------------------------------------------------
-    Total points: 1
+    Total points: 3
+
+    $ python3 klara.py list points
+      ID Description                    Topic      Points    Created   Finished
+    ---------------------------------------------------------------------------
+       2 Git setup                      admin           1 2017-07-13           
+       1 Create README                  doc             2 2017-07-13           
+    ---------------------------------------------------------------------------
+    Total points: 3
 
 ### Edit
 
@@ -28,15 +39,14 @@ edit \<id> [\<field> [\<value>]]
     Editing task 1.
     description ["Create README"]: 
     topic ["doc"]: meta
-    points ["1"]: 2
+    points ["2"]: 3
 
-    $ python3 klara.py edit 1 topic
+    $ python3 klara.py edit 1 points
     Editing task 1.
-    topic ["meta"]: doc
+    points ["2"]: 3
 
-    $ python3 klara.py edit 1 points 2
-    Setting points to 2.
-
+    $ python3 klara.py edit 1 points 3
+    Setting points to 3.
 
 ### Finish
 
