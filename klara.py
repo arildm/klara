@@ -52,14 +52,14 @@ class Klara():
         Klara.print_tasks(tasks)
 
     def print_tasks(tasks):
-        tpl = '{:>4} {:<30} {:<10} {:>6} {:>10} {:>10}'
-        width = 4 + 1 + 30 + 1 + 10 + 1 + 6 + 1 + 10 + 1 + 10
-        print(tpl.format('ID', 'Description', 'Topic', 'Points', 'Created', 'Finished'))
-        print(width * '-')
-        for task in tasks:
-            print(tpl.format(task.eid, task.description, task.topic, task.points,
-                task.created, task.finished))
-        print(width * '-')
+        print_table([
+            ('eid', 'ID', 4, '>'),
+            ('description', 'Description', 30, '<'),
+            ('topic', 'Topic', 10, '<'),
+            ('points', 'Points', 6, '>'),
+            ('created', 'Created', 10, '>'),
+            ('finished', 'Finished', 10, '>')
+        ], tasks)
         points_total = sum(int(task.points) for task in tasks)
         print('Total points: {}'.format(points_total))
 
@@ -122,15 +122,16 @@ class Klara():
         Klara.print_tasks(tasks)
 
 
-def format_time(dt):
-    tpl = '{:%Y-%m-%d}'
-    if isinstance(dt, datetime):
-        return tpl.format(dt)
-    try:
-        dt = int(dt)
-        return tpl.format(datetime.fromtimestamp(dt))
-    except ValueError: {}
-    raise ValueError('Time not recognizable')
+def print_table(fields, data):
+    keys = [f[0] for f in fields]
+    headers = [f[1] for f in fields]
+    width = sum(field[2] + 1 for field in fields) - 1
+    tpl = ''.join('{:' + f[3] + str(f[2]) + '} ' for f in fields)[:-1]
+    print(tpl.format(*headers))
+    print(width * '-')
+    for row in data:
+        print(tpl.format(*[getattr(row, key) for key in keys]))
+    print(width * '-')
 
 if __name__ == '__main__':
     if (len(sys.argv) < 2):
