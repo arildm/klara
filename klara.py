@@ -130,7 +130,7 @@ def print_table(fields, data):
     print(tpl.format(*headers))
     print(width * '-')
     for row in data:
-        print(tpl.format(*[getattr(row, key) for key in keys]))
+        print(tpl.format(*[str(getattr(row, k))[:w] for (k, l, w, a) in fields]))
     print(width * '-')
 
 if __name__ == '__main__':
